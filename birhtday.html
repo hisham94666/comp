@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday, Love ✨</title>
+  <meta name="description" content="A tiny handcrafted birthday website — made with love." />
+  <meta property="og:title" content="Happy Birthday, Love ✨" />
+  <meta property="og:description" content="Open me for a surprise…" />
+  <meta property="og:type" content="website" />
+  <style>
+    /*
+    =====================================
+    🎁 HOW TO CUSTOMIZE (quick guide)
+    -------------------------------------
+    1) Replace ALL CAPS placeholders like YOUR_NAME, HER_NAME, YOUR_PLAYLIST_URL.
+    2) Swap the 6 image URLs in the gallery with your photos (can be phone file paths too).
+    3) Edit messages in the <section> blocks.
+    4) Colors are defined in :root. Change once, affects everywhere.
+    5) Deploy options: share as a file, or host on GitHub Pages/Netlify/Vercel.
+    6) Optional: add your own music link in the “Play our song” button.
+    =====================================
+    */
+
+    :root{
+      --bg-1:#0f1020;       /* Deep night */
+      --bg-2:#1b1730;       /* Dim plum */
+      --accent:#ff6db6;     /* Candy pink */
+      --accent-2:#7cf7ff;   /* Neon cyan */
+      --ink:#f7f7fb;        /* Paper white */
+      --muted:#b8b8c7;
+      --card:#181830cc;     /* glassy */
+      --glass:rgba(255,255,255,.08);
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--ink);
+      background: radial-gradient(1200px 800px at 10% 10%, #251d45 0%, transparent 60%),
+                  radial-gradient(1000px 600px at 90% 0%, #2b1e3a 0%, transparent 70%),
+                  linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      overflow-x:hidden;
+    }
+
+    /* Floating hearts / confetti */
+    .floaty{ position:fixed; inset:0; pointer-events:none; z-index:0; }
+    .floaty span{
+      position:absolute; width:10px; height:10px; border-radius:2px;
+      background:var(--accent);
+      filter:blur(.2px); opacity:.85; transform:translateY(-10vh) rotate(0deg);
+      animation: fall 12s linear infinite;
+    }
+    .floaty span:nth-child(3n){ background:var(--accent-2)}
+    .floaty span:nth-child(5n){ width:8px;height:8px;opacity:.7}
+    .floaty span:nth-child(7n){ border-radius:50%}
+    @keyframes fall{ to{ transform: translateY(110vh) rotate(360deg); } }
+
+    header{
+      position:relative; z-index:1; padding:64px 18px 24px; text-align:center;
+    }
+    .badge{ display:inline-block; padding:6px 12px; border:1px solid var(--glass); border-radius:999px; color:var(--muted); backdrop-filter: blur(6px); }
+    .title{ font-size: clamp(32px, 5vw, 64px); line-height:1.05; margin:14px auto 10px; max-width:900px; }
+    .sub{ color:var(--muted); margin:0 auto 26px; max-width:720px }
+
+    .cta{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap }
+    .btn{
+      --ring: transparent;
+      background:linear-gradient(135deg, var(--accent), #ff9ed1);
+      color:#200818; border:0; padding:14px 20px; border-radius:999px; font-weight:700;
+      box-shadow: var(--shadow);
+      cursor:pointer; transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .btn:hover{ transform:translateY(-1px) scale(1.02) }
+    .btn.secondary{ background:transparent; color:var(--ink); border:1px solid var(--glass) }
+
+    main{ position:relative; z-index:1; padding: 0 18px 80px; }
+    .grid{ display:grid; grid-template-columns: repeat(12, 1fr); gap:18px; max-width:1100px; margin:0 auto }
+
+    .card{ background:var(--card); border:1px solid var(--glass); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden }
+    .card .inner{ padding:22px }
+    h2{ margin:0 0 10px; font-size: clamp(20px, 3vw, 30px); }
+    p{ color:#dee0ea; line-height:1.6; }
+
+    /* Gallery */
+    .gallery{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px }
+    .gallery img{ width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:14px; border:1px solid var(--glass); filter:saturate(1.05)}
+
+    /* Timeline */
+    .timeline{ position:relative; margin-top:10px }
+    .timeline::before{ content:""; position:absolute; left:14px; top:0; bottom:0; width:2px; background:linear-gradient(var(--accent), transparent 80%)}
+    .moment{ display:grid; grid-template-columns: 34px 1fr; gap:14px; padding:10px 0 }
+    .dot{ width:12px; height:12px; border-radius:50%; background:var(--accent-2); margin-top:6px; box-shadow:0 0 0 4px rgba(124,247,255,.12) }
+
+    /* Love coupons */
+    .coupons{ display:grid; grid-template-columns: repeat(2, 1fr); gap:10px }
+    .coupon{ border:1px dashed #ffffff30; border-radius:16px; padding:14px; background:linear-gradient(180deg, #ffffff08, #ffffff03) }
+
+    /* Secret letter (press & hold) */
+    .hold{ position:relative; }
+    .secret{
+      position:relative; border-radius:16px; overflow:hidden; min-height:150px; padding:16px; border:1px solid var(--glass);
+    }
+    .veil{ position:absolute; inset:0; background:linear-gradient(135deg, #ff6db670, #7cf7ff70); backdrop-filter: blur(10px); display:grid; place-items:center; transition: opacity .2s ease }
+    .hold:active .veil{ opacity:0 }
+    .hint{ font-size:14px; color:#000; font-weight:700; background:#fff; padding:6px 10px; border-radius:999px }
+
+    /* Countdown */
+    .countdown{ display:flex; gap:10px; flex-wrap:wrap }
+    .tick{ background:#ffffff10; border:1px solid var(--glass); border-radius:16px; padding:10px 14px; text-align:center; min-width:74px }
+    .tick b{ display:block; font-size:22px }
+
+    /* Footer */
+    footer{ text-align:center; color:var(--muted); padding: 34px 0 60px }
+
+    /* Responsive tweaks */
+    @media (max-width:800px){
+      .gallery{ grid-template-columns:repeat(2, 1fr) }
+      .coupons{ grid-template-columns: 1fr }
+    }
+  </style>
+</head>
+<body>
+  <!-- Floating confetti/hearts (generated in JS for variety) -->
+  <div class="floaty" id="floaty"></div>
+
+  <header>
+    <div class="badge">From HISHAM AHMED to NIDA NOOHA• 26 August</div>
+    <h1 class="title">Happy Birthday, <span style="color:var(--accent)">NIDA (BABY)</span>! 💖</h1>
+    <p class="sub">I coded this tiny website just for you. It’s my way of bottling up our memories, a few surprises, and a lot of love — all in one place. Scroll slowly. Breathe. Smile. This is your day. ✨</p>
+
+    <div class="cta">
+      <button class="btn" id="confettiBtn">Launch confetti 🎉</button>
+      <a class="btn secondary" href="YOUR_PLAYLIST_URL" target="_blank" rel="noopener">Play our song ▶️</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <!-- Gallery -->
+      <section class="card" style="grid-column: span 7;">
+        <div class="inner">
+          <h2>Little gallery of us</h2>
+          <p>Swap these photos with our favorites. Tip: square crops look best.</p>
+          <div class="gallery">
+            <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800&auto=format&fit=crop" alt="Memory 1" />
+            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&auto=format&fit=crop" alt="Memory 2" />
+            <img src="https://images.unsplash.com/photo-1495480677177-0a50a5c1b3d5?q=80&w=800&auto=format&fit=crop" alt="Memory 3" />
+            <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=800&auto=format&fit=crop" alt="Memory 4" />
+            <img src="https://images.unsplash.com/photo-1528892952291-009c663ce843?q=80&w=800&auto=format&fit=crop" alt="Memory 5" />
+            <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format&fit=crop" alt="Memory 6" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Countdown & wish -->
+      <section class="card" style="grid-column: span 5;">
+        <div class="inner">
+          <h2>Countdown to your day</h2>
+          <div class="countdown" id="countdown">
+            <div class="tick"><b id="d">--</b><span>Days</span></div>
+            <div class="tick"><b id="h">--</b><span>Hours</span></div>
+            <div class="tick"><b id="m">--</b><span>Minutes</span></div>
+            <div class="tick"><b id="s">--</b><span>Seconds</span></div>
+          </div>
+          <p style="margin-top:10px">P.S. If you’re seeing zeros, it means it’s already your birthday — time to celebrate! 🥳</p>
+        </div>
+      </section>
+
+      <!-- Secret letter (press and hold) -->
+      <section class="card" style="grid-column: span 12;">
+        <div class="inner hold">
+          <h2>Open letter (press & hold)</h2>
+          <div class="secret">
+            <div class="veil"><span class="hint">Press & hold to read</span></div>
+            <p>HER_NAME, I love how you laugh with your whole face, how you make ordinary days feel like festivals, and how you never give up on the people you care about. I’m proud of you today, tomorrow, and on all the messy, magical days in between. Thank you for choosing me. 💗</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Timeline -->
+      <section class="card" style="grid-column: span 7;">
+        <div class="inner">
+          <h2>Moments I never want to forget</h2>
+          <div class="timeline">
+            <div class="moment">
+              <div class="dot"></div>
+              <div><b>First coffee</b><br><span class="muted">Add date here</span><br>We split one muffin like we were already a team.
+              </div>
+            </div>
+            <div class="moment">
+              <div class="dot"></div>
+              <div><b>Inside joke</b><br><span class="muted">Add date here</span><br>Write the joke here — future us will still laugh.
+              </div>
+            </div>
+            <div class="moment">
+              <div class="dot"></div>
+              <div><b>That rainy walk</b><br><span class="muted">Add date here</span><br>We got soaked, but it felt like the city was clapping for us.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Love coupons -->
+      <section class="card" style="grid-column: span 5;">
+        <div class="inner">
+          <h2>Redeemable love coupons</h2>
+          <div class="coupons">
+            <div class="coupon">🍽️ One home‑cooked dinner by YOUR_NAME</div>
+            <div class="coupon">🎥 Movie night (you choose!)</div>
+            <div class="coupon">🧋 Boba on me — no limits</div>
+            <div class="coupon">🧺 I’ll do your chores day</div>
+          </div>
+          <p style="margin-top:8px; color:var(--muted)">Print screen and keep them safe. Terms: no expiry 😉</p>
+        </div>
+      </section>
+
+      <!-- Open when letters -->
+      <section class="card" style="grid-column: span 12;">
+        <div class="inner">
+          <h2>Open when…</h2>
+          <details class="coupon"><summary>you can’t sleep</summary><p>Put the phone down, breathe with me. Inhale 4… hold 4… exhale 6. I’m right there in your corner.</p></details>
+          <details class="coupon"><summary>you’ve had a rough day</summary><p>None of this changes how amazing you are. Hot shower. Comfy tee. I’ll bring the snacks.</p></details>
+          <details class="coupon"><summary>you miss me</summary><p>Close your eyes and count to three — I’ll text you a voice note right now.</p></details>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    Crafted with 💻 + 💖 by YOUR_NAME · <span id="year"></span>
+  </footer>
+
+  <script>
+    // Generate floating confetti/heart squares
+    const floaty = document.getElementById('floaty');
+    const makeBits = (n=60)=>{
+      floaty.innerHTML='';
+      for(let i=0;i<n;i++){
+        const e=document.createElement('span');
+        e.style.left = Math.random()*100+'vw';
+        e.style.animationDelay = (Math.random()*-10)+'s';
+        e.style.animationDuration = (8+Math.random()*10)+'s';
+        e.style.opacity = (0.5+Math.random()*0.5);
+        e.style.transform = `translateY(${(-10 - Math.random()*80)}vh)`;
+        floaty.appendChild(e);
+      }
+    }
+    makeBits();
+
+    // Button burst
+    document.getElementById('confettiBtn').addEventListener('click',()=>{
+      makeBits(140);
+      // small haptic nudge if supported
+      if (window.navigator.vibrate) navigator.vibrate(30);
+    });
+
+    // Countdown to Aug 26 (this year). If date passed, shows 0s.
+    (function() {
+  const now = new Date();
+  const year = now.getFullYear();
+  let target = new Date(year, 7, 26, 0, 0, 0); // August 26
+  if (now > target) {
+    target = new Date(year + 1, 7, 26, 0, 0, 0);
+  }
+
+  function tick() {
+    const t = target - new Date();
+    const d = Math.max(0, Math.floor(t / 86400000));
+    const h = Math.max(0, Math.floor((t % 86400000) / 3600000));
+    const m = Math.max(0, Math.floor((t % 3600000) / 60000));
+    const s = Math.max(0, Math.floor((t % 60000) / 1000));
+
+    document.getElementById('d').textContent = String(d).padStart(2, '0');
+    document.getElementById('h').textContent = String(h).padStart(2, '0');
+    document.getElementById('m').textContent = String(m).padStart(2, '0');
+    document.getElementById('s').textContent = String(s).padStart(2, '0');
+  }
+
+  tick(); // update immediately
+  setInterval(tick, 1000); // update every second
+})();
+
+    // Footer year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Tiny easter egg: type "xo" anywhere for a sparkle burst
+    (function(){
+      let buffer='';
+      document.addEventListener('keydown',(e)=>{
+        buffer = (buffer + e.key).slice(-2).toLowerCase();
+        if(buffer==='xo'){
+          makeBits(200);
+          setTimeout(()=>makeBits(60), 1000);
+        }
+      });

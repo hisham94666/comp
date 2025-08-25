@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hypermarket POS System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f6fa;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      font-family: 'Georgia', serif;
+      font-size: 2.5em;
+      color: #2c3e50;
+    }
+    .header-logo {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .header-logo img {
+      max-height: 80px;
+    }
+    .controls, .summary, .header {
+      margin-bottom: 20px;
+    }
+    input, select {
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #007bff;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #eee;
+    }
+    .barcode {
+      width: 100px;
+      height: 40px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header-logo">
+    <img src="logo.png" alt="Hypermarket Logo">
+  </div>
+  <h1>Hypermarket POS System</h1>
+
+  <div class="controls">
+    <input type="text" id="customerName" placeholder="Customer Name">
+    <input type="text" id="customerPhone" placeholder="Phone for Loyalty Points">
+    <input type="text" id="barcodeScan" placeholder="Scan Barcode" onkeypress="handleBarcodeInput(event)">
+    <input type="text" id="itemName" placeholder="Item Name">
+    <select id="variant">
+      <option value="">Variant (e.g. Size/Color)</option>
+      <option value="S-Red">Small - Red</option>
+      <option value="M-Blue">Medium - Blue</option>
+      <option value="L-Green">Large - Green</option>
+    </select>
+    <input type="number" id="itemQty" placeholder="Quantity">
+    <input type="number" id="itemPrice" placeholder="Price">
+    <input type="number" id="taxRate" placeholder="Tax %" value="18">
+    <input type="number" id="discountRate" placeholder="Discount %">
+    <button onclick="addItem()">Add Item</button>
+    <button onclick="downloadPDF()">Download PDF</button>
+    <button onclick="completeSale()">Complete Sale</button>
+    <button onclick="resetBill()">Reset</button>
+  </div>
+
+  <div id="invoice">
+    <div class="header">
+      <strong>Invoice No:</strong> <span id="invoiceNumber"></span><br>
+      <strong>Date:</strong> <span id="invoiceDate"></span><br>
+      <strong>Customer:</strong> <span id="customerOutput">N/A</span><br>
+      <strong>Loyalty Points:</strong> <span id="loyaltyPoints">0</span>
+      <div style="margin-top: 10px;">
+        <svg id="invoiceBarcode"></svg>
+      </div>
+    </div>
+
+    <table id="billTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Item</th>
+          <th>Variant</th>
+          <th>Qty</th>
+          <th>Price (₹)</th>
+          <th>Total (₹)</th>
+          <th>Barcode</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div style="text-align: right; margin-top: 20px;">
+      <button onclick="printBill()">Print</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let salesData = [];
+  let loyaltyDB = {};
+
+  const inventory = {
+    '123456789012': { name: 'Milk 1L', price: 55 },
+    '987654321098': { name: 'Bread', price: 35 },
+    '111222333444': { name: 'Toothpaste', price: 85 }
+  };
+
+  window.onload = function () {
+    const invoiceNumber = 'INV-' + Date.now();
+    document.getElementById('invoiceNumber').textContent = invoiceNumber;
+    document.getElementById('invoiceDate').textContent = new Date().toLocaleString();
+
+    JsBarcode("#invoiceBarcode", invoiceNumber, {
+      format: "CODE128",
+      lineColor: "#000",
+      width: 2,
+      height: 50,
+      displayValue: true
+    });
+  }
+
+  function handleBarcodeInput(event) {
+    if (event.key === 'Enter') {
+      const input = event.target;
+      const code = input.value.trim();
+      const item = inventory[code];
+      if (item) {
+        document.getElementById('itemName').value = item.name;
+        document.getElementById('itemPrice').value = item.price;
+        document.getElementById('itemQty').value = 1;
+        document.getElementById('itemQty').focus();
+      } else {
+        alert("Item not found in inventory");
+      }
+      input.value = '';
+    }
+  }
+
+  function addItem() {
+    const name = document.getElementById('itemName').value;
+    const variant = document.getElementById('variant').value;
+    const qty = parseFloat(document.getElementById('itemQty').value);
+    const price = parseFloat(document.getElementById('itemPrice').value);
+    const table = document.getElementById('billTable').getElementsByTagName('tbody')[0];
+    const row = table.insertRow();
+    const index = table.rows.length;
+
+    const total = qty * price;
+
+    const cell0 = row.insertCell(0); cell0.innerText = index;
+    const cell1 = row.insertCell(1); cell1.innerText = name;
+    const cell2 = row.insertCell(2); cell2.innerText = variant;
+    const cell3 = row.insertCell(3); cell3.innerText = qty;
+    const cell4 = row.insertCell(4); cell4.innerText = price;
+    const cell5 = row.insertCell(5); cell5.innerText = total.toFixed(2);
+    const cell6 = row.insertCell(6);
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    JsBarcode(svg, name + variant + index, {format:"CODE128", width:1, height:30, displayValue:false});
+    cell6.appendChild(svg);
+    const cell7 = row.insertCell(7);
+    const del = document.createElement('button');
+    del.textContent = 'X';
+    del.onclick = () => row.remove();
+    cell7.appendChild(del);
+  }
+
+  function printBill() {
+    const originalContents = document.body.innerHTML;
+    const invoiceContent = document.getElementById("invoice").innerHTML;
+
+    const doubleCopy = `
+      <div style="page-break-after: always;">
+        <h2 style="text-align:center">Customer Copy</h2>
+        ${invoiceContent}
+      </div>
+      <div>
+        <h2 style="text-align:center">Store Copy</h2>
+        ${invoiceContent}
+      </div>
+    `;
+
+    document.body.innerHTML = doubleCopy;
+    window.print();
+    document.body.innerHTML = originalContents;
+    location.reload();
+  }
+
+  function completeSale() {
+    const phone = document.getElementById('customerPhone').value;
+    const totalRows = document.getElementById('billTable').getElementsByTagName('tbody')[0].rows.length;
+    let totalItems = 0;
+    for (let i = 0; i < totalRows; i++) {
+      totalItems++;
+    }
+    if (phone) {
+      loyaltyDB[phone] = (loyaltyDB[phone] || 0) + totalItems * 2; // 2 points per item
+      document.getElementById('loyaltyPoints').textContent = loyaltyDB[phone];
+    }
+  }
+
+  function resetBill() {
+    const customerName = document.getElementById('customerName').value;
+    const customerPhone = document.getElementById('customerPhone').value;
+    const tax = document.getElementById('taxRate').value;
+    const discount = document.getElementById('discountRate').value;
+
+    document.querySelectorAll('input').forEach(input => {
+      if (!['taxRate', 'discountRate'].includes(input.id)) input.value = '';
+    });
+    document.getElementById('customerName').value = customerName;
+    document.getElementById('customerPhone').value = customerPhone;
+    document.getElementById('taxRate').value = tax;
+    document.getElementById('discountRate').value = discount;
+
+    const tbody = document.getElementById('billTable').getElementsByTagName('tbody')[0];
+    tbody.innerHTML = '';
+    document.getElementById('customerOutput').textContent = 'N/A';
+  }
+</script>
+</body>
+</html>

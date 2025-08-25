@@ -1,0 +1,488 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hypermarket Billing System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      margin: 0;
+      padding: 30px;
+      background: linear-gradient(120deg, #7F00FF, #E100FF);
+      background-size: 200% 200%;
+      color: #fff;
+      animation: pulseBG 12s ease infinite;
+    }
+
+    @keyframes pulseBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: rgba(239, 233, 233, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 12px 14px;
+      margin: 8px 6px;
+      border: none;
+      border-radius: 14px;
+      outline: none;
+      background: rgba(234, 230, 230, 0.8);
+      color: #222;
+      font-weight: bold;
+      width: calc(100% - 22px);
+      max-width: 200px;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      box-shadow: 0 0 8px #ff6ec4;
+    }
+
+    input::placeholder {
+      color: #888;
+    }
+
+    button {
+      padding: 12px 22px;
+      margin: 8px;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(135deg, #ff6ec4, #7873f5);
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background-position: right center;
+      box-shadow: 0 0 18px #ff6ec4;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 10px;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 14px;
+      text-align: left;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      color: #fff;
+    }
+
+    th {
+      background-color: rgba(255, 255, 255, 0.3);
+      font-weight: bold;
+    }
+
+    .barcode {
+      width: 100px;
+      height: 40px;
+    }
+
+    .summary {
+      font-size: 1.1rem;
+      margin-top: 25px;
+      background: rgba(255,255,255,0.1);
+      padding: 15px 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .summary p {
+      margin: 8px 0;
+    }
+
+    #invoice {
+      margin-top: 30px;
+    }
+
+    .header {
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    .remove-btn button {
+      background: #ff4d6d;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .remove-btn button:hover {
+      background: #ff0033;
+      box-shadow: 0 0 10px #ff0033;
+    }
+
+    /* Accessibility labels (hidden) */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+     @media print {
+      button,
+      .remove-btn {
+        display: none !important;
+      }
+    }
+    /* Paper roll style for printing */
+@media print {
+  @page {
+    size: 80mm auto;   /* set width to 80mm (receipt roll) */
+    margin: 0;         /* remove page margins */
+  }
+
+  body {
+    background: none !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    width: 80mm;       /* receipt width */
+    margin: 0 auto;
+    padding: 0;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #fff !important; /* force plain background for receipt */
+    color: #000 !important;      /* black text on white paper */
+  }
+
+  table th, table td {
+    font-size: 12px;   /* smaller text for compact bill */
+    padding: 4px 6px;
+  }
+
+  h1 {
+    font-size: 18px;
+    margin: 4px 0;
+    text-align: center;
+  }
+
+  .summary {
+    font-size: 12px;
+    padding: 4px;
+    margin: 0;
+  }
+
+  /* Hide all buttons */
+  button, .remove-btn {
+    display: none !important;
+  }
+}
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Hypermarket Billing System</h1>
+
+  <div class="controls">
+    <label for="customerName" class="sr-only">Customer Name</label>
+    <input type="text" id="customerName" placeholder="Customer Name">
+
+    <label for="barcodeScan" class="sr-only">Scan Barcode</label>
+    <input type="text" id="barcodeScan" placeholder="Scan Barcode" oninput="lookupBarcode(this.value)">
+
+    <label for="itemName" class="sr-only">Item Name</label>
+    <input type="text" id="itemName" placeholder="Item Name">
+
+    <label for="itemQty" class="sr-only">Quantity</label>
+    <input type="number" id="itemQty" placeholder="Quantity">
+
+    <label for="itemPrice" class="sr-only">Price</label>
+    <input type="number" id="itemPrice" placeholder="Price">
+
+    <label for="taxRate" class="sr-only">Tax %</label>
+    <input type="number" id="taxRate" placeholder="Tax %" value="18">
+
+    <label for="discountRate" class="sr-only">Discount %</label>
+    <input type="number" id="discountRate" placeholder="Discount %" value="5">
+
+    <div>
+      <button onclick="addItem()">Add Item</button>
+      <button onclick="downloadPDF()">Download PDF</button>
+      <button onclick="completeSale()">Complete Sale</button>
+      <button onclick="resetBill()">Reset</button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div id="errorMsg" style="color:#ff4d6d; font-weight:bold; margin-top:10px;"></div>
+
+  <div id="invoice">
+    <div class="header">
+      <strong>Invoice No:</strong> <span id="invoiceNumber"></span><br>
+      <strong>Date:</strong> <span id="invoiceDate"></span><br>
+      <strong>Customer:</strong> <span id="customerOutput">NO NAME</span>
+      <div style="position: relative; height: 100px;">
+        <div style="position: absolute; left: 20px; top: 20px;"><svg id="invoiceBarcode"></svg></div>
+      </div>
+    </div>
+
+    <table id="billTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Price (₹)</th>
+          <th>Total (₹)</th>
+          <th>Barcode</th>
+          <th class="remove-btn">Remove</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    
+    <div class="summary">
+      <p>Subtotal: <span id="grandTotal">₹0.00</span></p>
+      <p>Tax: <span id="taxValue">₹0.00</span></p>
+      <p>Discount: <span id="discountValue">₹0.00</span></p>
+      <p><strong>Net Total: <span id="netTotal">₹0.00</span></strong></p>
+
+      <div style="text-align: right; margin-bottom: 20px;">
+        <button onclick="printBill()">Print</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer style="background: rgba(0,0,0,0.3); color: #fff; text-align: center; padding: 15px 0; margin-top: 30px; border-radius: 15px;">
+  <p>&copy; Techno2Hack 2025. All rights reserved.</p>
+  <p>
+    <a href="#" style="color: #fff; text-decoration: none; margin: 0 10px;">Privacy Policy</a> |
+    <a href="#" style="color: #fff; text-decoration: none; margin: 0 10px;">Terms of Service</a> |
+    <a href="#" style="color: #fff; text-decoration: none; margin: 0 10px;">Contact</a>
+  </p>
+</footer>
+
+<script>
+  let grandTotal = 0;
+  let rowCount = 1;
+  let invoiceNum = 'INV-' + Date.now();
+
+  function initInvoice() {
+    document.getElementById('invoiceNumber').innerText = invoiceNum;
+    document.getElementById('invoiceDate').innerText = new Date().toLocaleString();
+    JsBarcode("#invoiceBarcode", invoiceNum, { format: "CODE128", width: 2, height: 40 });
+  }
+  window.onload = initInvoice;
+
+  const inventory = {
+    "1001": { name: "Milk 1L", price: 45 },
+    "1002": { name: "Bread Loaf", price: 35 },
+    "1003": { name: "Eggs (6 Pack)", price: 60 },
+    "1004": { name: "Soap Bar", price: 25 },
+    "1005": { name: "Shampoo Bottle 200ml", price: 120 },
+    "1006": { name: "Rice 1Kg", price: 80 },
+    "1007": { name: "Sugar 1Kg", price: 45 },
+    "1008": { name:  "Washing Powder",price: 52},
+    "5091": { name:  "Maaza",price: 10},
+    "6122": { name: "hauser pen ",price: 10}
+  };
+
+  function formatINR(amount) {
+    return amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
+  }
+
+  function lookupBarcode(code) {
+    const item = inventory[code];
+    if (item) {
+      document.getElementById('itemName').value = item.name;
+      document.getElementById('itemPrice').value = item.price;
+      document.getElementById('itemQty').focus();
+    }
+  }
+
+  function addItem() {
+    const customerName = document.getElementById('customerName').value;
+    if (customerName) {
+      document.getElementById('customerOutput').innerText = customerName;
+    }
+
+    const name = document.getElementById('itemName').value;
+    const qty = parseInt(document.getElementById('itemQty').value);
+    const price = parseFloat(document.getElementById('itemPrice').value);
+
+    if (!name || isNaN(qty) || isNaN(price)) {
+      document.getElementById("errorMsg").innerText = "⚠️ Please fill all required fields.";
+      return;
+    } else {
+      document.getElementById("errorMsg").innerText = "";
+    }
+
+    const total = qty * price;
+    grandTotal += total;
+    const tbody = document.getElementById('billTable').getElementsByTagName('tbody')[0];
+    const row = tbody.insertRow();
+    const itemCode = name.substring(0,3).toUpperCase() + Date.now();
+
+    row.innerHTML = `
+      <td>${rowCount++}</td>
+      <td>${name}</td>
+      <td>${qty}</td>
+      <td>${formatINR(price)}</td>
+      <td>${formatINR(total)}</td>
+      <td><svg class="barcode" id="bc${itemCode}"></svg></td>
+      <td><button onclick="removeItem(this, ${total})">Delete</button></td>
+    `;
+    JsBarcode(`#bc${itemCode}`, itemCode, { format: "CODE128", width: 1.5, height: 30 });
+
+    updateTotals();
+
+    // Auto-clear inputs
+    document.getElementById('barcodeScan').value = '';
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemQty').value = '';
+    document.getElementById('itemPrice').value = '';
+    document.getElementById('barcodeScan').focus();
+  }
+
+  function removeItem(button, amount) {
+    const row = button.parentNode.parentNode;
+    row.remove();
+    grandTotal -= amount;
+    updateTotals();
+  }
+
+  function updateTotals() {
+    const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+    const discountRate = parseFloat(document.getElementById('discountRate').value) || 0;
+    const tax = (taxRate / 100) * grandTotal;
+    const discount = (discountRate / 100) * grandTotal;
+    const net = grandTotal + tax - discount;
+    document.getElementById('grandTotal').innerText = formatINR(grandTotal);
+    document.getElementById('taxValue').innerText = formatINR(tax);
+    document.getElementById('discountValue').innerText = formatINR(discount);
+    document.getElementById('netTotal').innerText = formatINR(net);
+  }
+
+  function printBill() {
+    const originalContents = document.body.innerHTML;
+    const invoiceContent = document.getElementById("invoice").innerHTML;
+
+    const doubleCopy = `
+      <div style="page-break-after: always;">
+        <h2 style="text-align:center">Customer Copy</h2>
+        ${invoiceContent}
+      </div>
+      <div>
+        <h2 style="text-align:center">Store Copy</h2>
+        ${invoiceContent}
+      </div>
+    `;
+
+    document.body.innerHTML = doubleCopy;
+    window.print();
+    document.body.innerHTML = originalContents;
+    location.reload();
+  }
+
+  function downloadPDF() {
+    html2pdf().from(document.getElementById("invoice")).save("Invoice_" + invoiceNum + ".pdf");
+  }
+
+  function completeSale() {
+    const items = [];
+    document.querySelectorAll('#billTable tbody tr').forEach(row => {
+      const cells = row.querySelectorAll('td');
+      items.push({
+        name: cells[1].innerText,
+        qty: parseInt(cells[2].innerText),
+        price: parseFloat(cells[3].innerText.replace(/[₹,]/g, '')),
+        total: parseFloat(cells[4].innerText.replace(/[₹,]/g, '')),
+      });
+    });
+
+    const payload = {
+      invoiceNumber: document.getElementById('invoiceNumber').innerText,
+      customerName: document.getElementById('customerOutput').innerText,
+      date: document.getElementById('invoiceDate').innerText,
+      items: items,
+      totals: {
+        subtotal: grandTotal,
+        tax: parseFloat(document.getElementById('taxValue').innerText.replace(/[₹,]/g, '')),
+        discount: parseFloat(document.getElementById('discountValue').innerText.replace(/[₹,]/g, '')),
+        netTotal: parseFloat(document.getElementById('netTotal').innerText.replace(/[₹,]/g, '')),
+      }
+    };
+
+    fetch('http://localhost:5000/api/bill', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || 'Sale completed!');
+    })
+    .catch(() => alert('Failed to save bill.'));
+  }
+
+  function resetBill() {
+    grandTotal = 0;
+    rowCount = 1;
+    invoiceNum = 'INV-' + Date.now();
+    document.getElementById('invoiceNumber').innerText = invoiceNum;
+    document.getElementById('invoiceDate').innerText = new Date().toLocaleString();
+    document.getElementById('customerOutput').innerText = 'NO NAME';
+    document.getElementById('customerName').value = '';
+    document.getElementById('barcodeScan').value = '';
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemQty').value = '';
+    document.getElementById('itemPrice').value = '';
+    document.getElementById('taxRate').value = '18';
+    document.getElementById('discountRate').value = '5';
+    document.querySelector('#billTable tbody').innerHTML = '';
+    updateTotals();
+    document.getElementById('invoiceBarcode').innerHTML = '';
+    JsBarcode("#invoiceBarcode", invoiceNum, { format: "CODE128", width: 2, height: 40 });
+  }
+</script>
+</body>
+</html>

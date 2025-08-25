@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>POS Billing System - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #2c3e50, #4ca1af);
+    }
+
+    .marquee {
+      background-color: #e74c3c;
+      color: white;
+      font-size: 20px;
+      padding: 10px 0;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    marquee {
+      font-family: Arial, sans-serif;
+    }
+
+    .overlay {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: calc(100% - 50px);
+    }
+
+    .login-box {
+      width: 350px;
+      background-color: #ffffff;
+      padding: 40px;
+      color: #333;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+
+    .login-box h1 {
+      margin-bottom: 25px;
+      font-size: 28px;
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #f7f7f7;
+      font-size: 16px;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      background-color: #27ae60;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .login-box button:hover {
+      background-color: #219150;
+    }
+
+    .forgot-password {
+      text-align: right;
+      font-size: 13px;
+      margin-top: -10px;
+      margin-bottom: 20px;
+    }
+
+    .forgot-password a {
+      color: #2980b9;
+      text-decoration: none;
+    }
+
+    .forgot-password a:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 13px;
+      color: #bbb;
+    }
+
+    .footer a {
+      color: #2980b9;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Marquee Header -->
+  <div class="marquee">
+    <marquee behavior="scroll" direction="left">POS BILLING SYSTEM</marquee>
+  </div>
+
+  <div class="overlay">
+    <div class="login-box">
+      <h1>Login</h1>
+      <form onsubmit="return validateLogin()">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+
+        <!-- Forgot Password Link -->
+        <div class="forgot-password">
+          <a href="#">Forgot your password?</a>
+        </div>
+
+        <button type="submit">Login</button>
+      </form>
+
+      <div class="footer">
+        Don't have an account? <a href="#">Contact Admin</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function validateLogin() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (username === "HISHAM" && password === "123456789") {
+        window.location.href = "pos-system.html";
+        return false;
+      } else {
+        alert("Invalid username or password.");
+        return false;
+      }
+    }
+  </script>
+</body>
+</html>
